@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>行迹 · 国内旅游规划（演示原型 v1.1）</title>
+<link rel="stylesheet" href="assets/styles.css?v=1.1-icons">
+</head>
+<body>
+<div class="demo-flag" role="status">方案已确认 · 原型 v1.1 · 数据为演示，真实服务待接入，尚未正式上线</div>
+
+<div class="app">
+  <header class="topbar">
+    <a class="brand" href="#/trips">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text"><strong>行迹</strong><small>国内旅游规划</small></span>
+    </a>
+    <div class="topbar-right">
+      <label class="role-switch">
+        <span>演示角色</span>
+        <select id="role-select" aria-label="演示角色">
+          <option value="owner">旅行负责人</option>
+          <option value="editor">可编辑成员</option>
+          <option value="readonly">只读成员</option>
+        </select>
+      </label>
+      <a class="icon-btn" href="#/settings" aria-label="设置与数据">设置</a>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="main" id="view" tabindex="-1"></main>
+  </div>
+
+  <nav class="tabbar" id="tabbar" aria-label="主导航"></nav>
+</div>
+
+<div class="toast-wrap" id="toast" aria-live="polite"></div>
+<div class="modal-root" id="modal"></div>
+
+<script src="assets/icons.js?v=1.1-icons"></script>
+<script src="assets/data.js?v=1.1-icons"></script>
+<script src="assets/core.js?v=1.1-icons"></script>
+<script src="assets/views-trip.js?v=1.1-icons"></script>
+<script src="assets/views-plan.js?v=1.1-icons"></script>
+<script src="assets/views-manage.js?v=1.1-icons"></script>
+<script src="assets/views-live.js?v=1.1-icons"></script>
+<script src="assets/boot.js?v=1.1-icons"></script>
+</body>
+</html>
