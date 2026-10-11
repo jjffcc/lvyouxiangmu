@@ -248,8 +248,8 @@ export default function TripsApp({ account, onLogout, logoutPending, message }) 
     if (loadError) return false;
     const exists = trips.some((item) => item.id === trip.id);
     const nextTrips = exists
-      ? trips.map((item) => item.id === trip.id ? trip : item)
-      : [trip, ...trips];
+      ? trips.map((item) => item.id === trip.id ? { ...item, ...trip } : item)
+      : [{ ...trip, favoriteDestinationIds: [] }, ...trips];
     if (!saveTrips(nextTrips)) return false;
     setSelectedTripId(trip.id);
     setStatusMessage(exists ? "旅行档案已更新。" : "旅行档案已创建。 ");
@@ -265,6 +265,22 @@ export default function TripsApp({ account, onLogout, logoutPending, message }) 
     if (!saveTrips(nextTrips)) return;
     setSelectedTripId((current) => current === trip.id ? nextTrips[0]?.id ?? null : current);
     setStatusMessage(`“${trip.name}”及其关联旅行内容已删除。`);
+  }
+
+  function toggleDestinationFavorite(destinationId) {
+    if (!selectedTrip || loadError) return;
+    const favoriteDestinationIds = selectedTrip.favoriteDestinationIds ?? [];
+    const isFavorite = favoriteDestinationIds.includes(destinationId);
+    const updatedTrip = {
+      ...selectedTrip,
+      favoriteDestinationIds: isFavorite
+        ? favoriteDestinationIds.filter((id) => id !== destinationId)
+        : [...favoriteDestinationIds, destinationId],
+    };
+    const nextTrips = trips.map((trip) => trip.id === selectedTrip.id ? updatedTrip : trip);
+    if (saveTrips(nextTrips)) {
+      setStatusMessage(isFavorite ? "已从当前旅行取消收藏。" : "已收藏到当前旅行。 ");
+    }
   }
 
   function retryRead() {
@@ -348,7 +364,11 @@ export default function TripsApp({ account, onLogout, logoutPending, message }) 
               </>}
             </>
           ) : (
-            <DestinationDiscovery tripDestinations={trips.flatMap((trip) => trip.destinations)} />
+            <DestinationDiscovery
+              tripDestinations={trips.flatMap((trip) => trip.destinations)}
+              trip={selectedTrip}
+              onToggleFavorite={toggleDestinationFavorite}
+            />
           )}
         </div>
       </main>
