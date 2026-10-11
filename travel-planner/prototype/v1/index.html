@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f4f8ff">
+  <meta name="description" content="途见旅行规划静态交互演示网站">
+  <title>途见 · 旅行计划</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="demo-ribbon"><span class="ribbon-dot"></span>交互演示 · 示例内容不作为真实出行信息 · 高德服务尚未接入</div>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="workspace">
+      <header class="topbar" id="topbar"></header>
+      <main id="main" tabindex="-1"></main>
+    </div>
+  </div>
+  <nav class="mobile-nav" id="mobile-nav" aria-label="主要功能"></nav>
+  <div id="modal-root"></div>
+  <div id="toast-root" aria-live="polite" aria-atomic="true"></div>
+  <script src="../assets/icons.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
