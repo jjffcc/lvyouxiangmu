@@ -1,5 +1,6 @@
 import { useState } from "react";
 import DestinationDiscovery from "./DestinationDiscovery.jsx";
+import Expenses from "./Expenses.jsx";
 import Itinerary from "./Itinerary.jsx";
 import { readAccountTrips, saveAccountTrips } from "./trips.js";
 import "./trips.css";
@@ -292,6 +293,14 @@ export default function TripsApp({ account, onLogout, logoutPending, message }) 
     return true;
   }
 
+  function saveExpenseItems(expenses) {
+    if (!selectedTrip || loadError) return false;
+    const nextTrips = trips.map((trip) => trip.id === selectedTrip.id ? { ...trip, expenses } : trip);
+    if (!saveTrips(nextTrips)) return false;
+    setStatusMessage("购买信息已保存到当前旅行。");
+    return true;
+  }
+
   function retryRead() {
     const result = readInitialTrips(account.id);
     setTrips(result.trips);
@@ -309,6 +318,7 @@ export default function TripsApp({ account, onLogout, logoutPending, message }) 
           <button type="button" className={`nav-item${activePage === "trips" ? " active" : ""}`} onClick={() => setActivePage("trips")}><span className="ui-icon" aria-hidden="true">⌂</span>旅行总览</button>
           <button type="button" className={`nav-item${activePage === "destinations" ? " active" : ""}`} onClick={() => setActivePage("destinations")}>目的地发现</button>
           <button type="button" className={`nav-item${activePage === "itinerary" ? " active" : ""}`} onClick={() => setActivePage("itinerary")}>每日行程</button>
+          <button type="button" className={`nav-item${activePage === "expenses" ? " active" : ""}`} onClick={() => setActivePage("expenses")}>购买信息</button>
         </nav>
         <div className="sidebar-bottom">
           {selectedTrip && <div className="mini-trip"><div className="mini-trip-label">当前旅行</div><div className="mini-trip-title">{selectedTrip.name}</div><div className="mini-trip-city">{selectedTrip.destinations.join(" · ") || "目的地未填写"}</div></div>}
@@ -318,7 +328,7 @@ export default function TripsApp({ account, onLogout, logoutPending, message }) 
 
       <main className="workspace">
         <header className="topbar">
-          <div className="crumb">途见 <span aria-hidden="true">/</span> <strong>{activePage === "trips" ? "我的旅行" : activePage === "destinations" ? "目的地发现" : "每日行程"}</strong></div>
+          <div className="crumb">途见 <span aria-hidden="true">/</span> <strong>{activePage === "trips" ? "我的旅行" : activePage === "destinations" ? "目的地发现" : activePage === "itinerary" ? "每日行程" : "购买信息"}</strong></div>
           <div className="top-actions">
             <span className="top-date">账户旅行资料独立保存</span>
             <button type="button" className="btn small" onClick={onLogout} disabled={logoutPending}>{logoutPending ? "正在退出…" : "退出登录"}</button>
@@ -379,13 +389,22 @@ export default function TripsApp({ account, onLogout, logoutPending, message }) 
               trip={selectedTrip}
               onToggleFavorite={toggleDestinationFavorite}
             />
-          ) : (
+          ) : activePage === "itinerary" ? (
             <Itinerary
               key={selectedTrip?.id ?? "no-selected-trip"}
               trip={selectedTrip}
               canEdit={!loadError}
               onSaveItems={saveItineraryItems}
               canCreateTrip={!loadError}
+              onCreateTrip={() => { setActivePage("trips"); setEditor({ trip: null }); }}
+            />
+          ) : (
+            <Expenses
+              key={selectedTrip?.id ?? "no-selected-trip"}
+              trip={selectedTrip}
+              canEdit={!loadError}
+              canCreateTrip={!loadError}
+              onSaveItems={saveExpenseItems}
               onCreateTrip={() => { setActivePage("trips"); setEditor({ trip: null }); }}
             />
           )}
@@ -396,6 +415,7 @@ export default function TripsApp({ account, onLogout, logoutPending, message }) 
         <button type="button" className={`nav-item${activePage === "trips" ? " active" : ""}`} onClick={() => setActivePage("trips")}>旅行总览</button>
         <button type="button" className={`nav-item${activePage === "destinations" ? " active" : ""}`} onClick={() => setActivePage("destinations")}>目的地发现</button>
         <button type="button" className={`nav-item${activePage === "itinerary" ? " active" : ""}`} onClick={() => setActivePage("itinerary")}>每日行程</button>
+        <button type="button" className={`nav-item${activePage === "expenses" ? " active" : ""}`} onClick={() => setActivePage("expenses")}>购买信息</button>
       </nav>
 
       {editor && <TripEditor key={editor.trip?.id ?? "new-trip"} trip={editor.trip} onClose={() => setEditor(null)} onSave={saveTrip} />}
