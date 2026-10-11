@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import TripsApp from "./TripsApp.jsx";
 
 function Brand() {
   return (
@@ -223,17 +224,7 @@ export default function App() {
   }
 
   if (account) {
-    return (
-      <AuthFrame>
-        <span className="login-eyebrow">WELCOME TO YOUR JOURNEY</span>
-        <h2>已登录</h2>
-        <p className="login-lead">登录状态有效，可以继续规划旅程。</p>
-        <button className="btn primary login-submit" type="button" onClick={logout} disabled={submitting}>
-          {submitting ? "正在退出…" : "退出登录"}
-        </button>
-        <p className="login-message" role="status" aria-live="polite">{message}</p>
-      </AuthFrame>
-    );
+    return <TripsApp key={account.id} account={account} onLogout={logout} logoutPending={submitting} message={message} />;
   }
 
   return (
