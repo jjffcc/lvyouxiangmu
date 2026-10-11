@@ -41,10 +41,10 @@ function Brand() {
   );
 }
 
-function TripEditor({ trip, onClose, onSave }) {
-  const [name, setName] = useState(trip?.name ?? "");
+function TripEditor({ trip, reuseSource, onClose, onSave }) {
+  const [name, setName] = useState(reuseSource ? `${reuseSource.name}（复用）` : trip?.name ?? "");
   const [destinations, setDestinations] = useState(() => {
-    const saved = trip?.destinations ?? [];
+    const saved = reuseSource?.destinations ?? trip?.destinations ?? [];
     return saved.length
       ? saved.map((value, index) => ({ key: `destination-${index}`, value }))
       : [{ key: "destination-new", value: "" }];
@@ -102,6 +102,10 @@ function TripEditor({ trip, onClose, onSave }) {
       people: peopleCount,
       budget: totalBudget,
       preferences: preferences.trim(),
+      ...(reuseSource ? {
+        favoriteDestinationIds: [...(reuseSource.favoriteDestinationIds ?? [])],
+        itineraryItems: (reuseSource.itineraryItems ?? []).map((item) => ({ ...item, id: crypto.randomUUID() })),
+      } : {}),
     });
     if (saved) onClose();
   }
@@ -111,8 +115,8 @@ function TripEditor({ trip, onClose, onSave }) {
       <section className="modal trip-modal" role="dialog" aria-modal="true" aria-labelledby="trip-modal-title">
         <div className="modal-head">
           <div>
-            <h2 id="trip-modal-title">{trip ? "编辑旅行档案" : "新建旅行档案"}</h2>
-            <p>旅行资料仅保存在当前浏览器，并与当前账户分开保存。</p>
+            <h2 id="trip-modal-title">{trip ? "编辑旅行档案" : reuseSource ? "基于已有旅行创建新草稿" : "新建旅行档案"}</h2>
+            <p>{reuseSource ? "保留目的地、收藏和手工日程参考；日期、预算、人数和偏好请重新填写。" : "旅行资料仅保存在当前浏览器，并与当前账户分开保存。"}</p>
           </div>
           <button type="button" className="modal-x" aria-label="关闭" onClick={onClose}>×</button>
         </div>
@@ -197,7 +201,7 @@ function displayBudget(value) {
   return new Intl.NumberFormat("zh-CN", { style: "currency", currency: "CNY", maximumFractionDigits: 2 }).format(value);
 }
 
-function TripCard({ trip, selected, onSelect, onEdit, onDelete }) {
+function TripCard({ trip, selected, onSelect, onEdit, onReuse, onDelete }) {
   return (
     <article className={`card trip-card trip-card-v2${selected ? " selected" : ""}`}>
       <div className="trip-card-top">
@@ -217,6 +221,7 @@ function TripCard({ trip, selected, onSelect, onEdit, onDelete }) {
         <div className="trip-card-actions">
           <button type="button" className={`btn small${selected ? " soft" : ""}`} onClick={() => onSelect(trip.id)}>{selected ? "当前旅行" : "查看档案"}</button>
           <button type="button" className="btn small" onClick={() => onEdit(trip)}>编辑</button>
+          <button type="button" className="btn small" onClick={() => onReuse(trip)}>复用为新草稿</button>
           <button type="button" className="btn small danger" onClick={() => onDelete(trip)}>删除</button>
         </div>
       </div>
@@ -252,7 +257,7 @@ export default function TripsApp({ account, onLogout, logoutPending, message }) 
     const exists = trips.some((item) => item.id === trip.id);
     const nextTrips = exists
       ? trips.map((item) => item.id === trip.id ? { ...item, ...trip } : item)
-      : [{ ...trip, favoriteDestinationIds: [] }, ...trips];
+      : [{ ...trip, favoriteDestinationIds: trip.favoriteDestinationIds ?? [] }, ...trips];
     if (!saveTrips(nextTrips)) return false;
     setSelectedTripId(trip.id);
     setStatusMessage(exists ? "旅行档案已更新。" : "旅行档案已创建。 ");
@@ -370,7 +375,7 @@ export default function TripsApp({ account, onLogout, logoutPending, message }) 
               <div className="section-head" id="trip-list"><div><h2>旅行档案</h2><p>切换当前旅行，或调整档案信息。</p></div></div>
               {trips.length ? (
                 <div className="grid trip-list-grid">
-                  {trips.map((trip) => <TripCard key={trip.id} trip={trip} selected={trip.id === selectedTrip?.id} onSelect={setSelectedTripId} onEdit={(item) => setEditor({ trip: item })} onDelete={deleteTrip} />)}
+                  {trips.map((trip) => <TripCard key={trip.id} trip={trip} selected={trip.id === selectedTrip?.id} onSelect={setSelectedTripId} onEdit={(item) => setEditor({ trip: item })} onReuse={(source) => setEditor({ reuseSource: source })} onDelete={deleteTrip} />)}
                 </div>
               ) : (
                 <div className="empty trip-empty-state"><strong>还没有旅行档案</strong><span>新建一份旅行，添加一个或多个按顺序排列的国内目的地。</span><button type="button" className="btn primary" onClick={() => setEditor({ trip: null })}>创建第一份旅行</button></div>
@@ -438,7 +443,7 @@ export default function TripsApp({ account, onLogout, logoutPending, message }) 
         <button type="button" className={`nav-item${activePage === "preparation" ? " active" : ""}`} onClick={() => setActivePage("preparation")}>出行准备</button>
       </nav>
 
-      {editor && <TripEditor key={editor.trip?.id ?? "new-trip"} trip={editor.trip} onClose={() => setEditor(null)} onSave={saveTrip} />}
+      {editor && <TripEditor key={editor.trip?.id ?? editor.reuseSource?.id ?? "new-trip"} trip={editor.trip} reuseSource={editor.reuseSource} onClose={() => setEditor(null)} onSave={saveTrip} />}
     </div>
   );
 }
