@@ -12,15 +12,22 @@ function formatDate(date) {
   return new Intl.DateTimeFormat("zh-CN", { dateStyle: "full" }).format(new Date(`${date}T00:00:00`));
 }
 
-function ItineraryItem({ item, outsideRange, canEdit, onEdit, onDelete }) {
+function ItineraryItem({ item, outsideRange, canEdit, position, itemCount, onMove, onToggleLock, onEdit, onDelete }) {
   return (
-    <article className="card itinerary-item-card">
+    <article className={`card itinerary-item-card${item.locked ? " itinerary-item-locked" : ""}`}>
       <div className="itinerary-item-heading">
         <div>
           <span className="sample-label">{item.category}{outsideRange ? " · 超出当前旅行日期" : ""}</span>
           <h3>{item.name}</h3>
+          <span className={`itinerary-lock-state${item.locked ? " is-locked" : ""}`} role="status">
+            {item.locked ? "已锁定" : "未锁定"}
+          </span>
         </div>
         <div className="itinerary-item-actions">
+          {position !== undefined && <span className="itinerary-item-position">第 {position} 项</span>}
+          {position !== undefined && <button type="button" className="btn small" aria-label={`上移事项：${item.name}`} disabled={!canEdit || position === 1} onClick={() => onMove(-1)}>上移</button>}
+          {position !== undefined && <button type="button" className="btn small" aria-label={`下移事项：${item.name}`} disabled={!canEdit || position === itemCount} onClick={() => onMove(1)}>下移</button>}
+          <button type="button" className="btn small" disabled={!canEdit} onClick={onToggleLock}>{item.locked ? "解除锁定" : "锁定安排"}</button>
           <button type="button" className="btn small" disabled={!canEdit} onClick={() => onEdit(item)}>编辑</button>
           <button type="button" className="btn small danger" disabled={!canEdit} onClick={() => onDelete(item)}>删除</button>
         </div>
@@ -65,6 +72,7 @@ function ItineraryEditor({ item, selectedDate, trip, onClose, onSave }) {
 
     const saved = onSave({
       id: item?.id ?? crypto.randomUUID(),
+      locked: item?.locked ?? false,
       name: name.trim(),
       category,
       date,
@@ -159,10 +167,29 @@ export default function Itinerary({ trip, canEdit, onSaveItems, onCreateTrip, ca
     onSaveItems(items.filter((existing) => existing.id !== item.id));
   }
 
+  function moveDayItem(currentIndex, direction) {
+    const nextIndex = currentIndex + direction;
+    if (!canEdit || nextIndex < 0 || nextIndex >= dayItems.length) return;
+
+    const reorderedDayItems = [...dayItems];
+    const [movedItem] = reorderedDayItems.splice(currentIndex, 1);
+    reorderedDayItems.splice(nextIndex, 0, movedItem);
+
+    const dayItemIds = new Set(dayItems.map((item) => item.id));
+    let reorderedIndex = 0;
+    const nextItems = items.map((item) => dayItemIds.has(item.id) ? reorderedDayItems[reorderedIndex++] : item);
+    onSaveItems(nextItems);
+  }
+
+  function toggleItemLock(item) {
+    if (!canEdit) return;
+    onSaveItems(items.map((existing) => existing.id === item.id ? { ...existing, locked: !existing.locked } : existing));
+  }
+
   return (
     <>
       <div className="page-intro">
-        <div><div className="eyebrow">DAY BY DAY</div><h1>每日行程</h1><p>由你决定每天安排什么；地点和时间未填写时会明确显示。</p></div>
+        <div><div className="eyebrow">DAY BY DAY</div><h1>每日行程</h1><p>由你决定每天安排什么；可手动调整顺序，锁定只记录你的选择，不自动排序或更改时间。</p></div>
         <div className="intro-actions"><button type="button" className="btn primary" disabled={!canEdit || !selectedDate || !isWithinTripDates(selectedDate, trip)} onClick={() => setEditor({ item: null })}>＋ 添加事项</button></div>
       </div>
 
@@ -180,7 +207,7 @@ export default function Itinerary({ trip, canEdit, onSaveItems, onCreateTrip, ca
           <div className="notice itinerary-range-notice" role="status">所选日期不在当前旅行日期范围内。已保存事项仍会保留，请调整档案或日期后查看。</div>
         ) : dayItems.length ? (
           <div className="itinerary-item-list">
-            {dayItems.map((item) => <ItineraryItem key={item.id} item={item} canEdit={canEdit} onEdit={(value) => setEditor({ item: value })} onDelete={deleteItem} />)}
+            {dayItems.map((item, index) => <ItineraryItem key={item.id} item={item} position={index + 1} itemCount={dayItems.length} canEdit={canEdit} onMove={(direction) => moveDayItem(index, direction)} onToggleLock={() => toggleItemLock(item)} onEdit={(value) => setEditor({ item: value })} onDelete={deleteItem} />)}
           </div>
         ) : (
           <div className="empty itinerary-empty-state"><strong>这一天还没有安排</strong><span>添加第一项活动、用餐、住宿或交通事项。</span><button type="button" className="btn primary" disabled={!canEdit || !isWithinTripDates(selectedDate, trip)} onClick={() => setEditor({ item: null })}>添加第一项</button></div>
@@ -191,7 +218,7 @@ export default function Itinerary({ trip, canEdit, onSaveItems, onCreateTrip, ca
         <section className="itinerary-out-of-range">
           <div className="section-head"><div><h2>超出当前旅行日期的已保存事项</h2><p>调整旅行日期时，既有事项会保留在这里，可编辑日期或删除。</p></div></div>
           <div className="itinerary-item-list">
-            {outOfRangeItems.map((item) => <ItineraryItem key={item.id} item={item} outsideRange canEdit={canEdit} onEdit={(value) => setEditor({ item: value })} onDelete={deleteItem} />)}
+            {outOfRangeItems.map((item) => <ItineraryItem key={item.id} item={item} outsideRange canEdit={canEdit} onToggleLock={() => toggleItemLock(item)} onEdit={(value) => setEditor({ item: value })} onDelete={deleteItem} />)}
           </div>
         </section>
       )}
