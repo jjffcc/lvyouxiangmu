@@ -8,6 +8,15 @@ function formatAmount(amount) {
   return new Intl.NumberFormat("zh-CN", { style: "currency", currency: "CNY", maximumFractionDigits: 2 }).format(amount);
 }
 
+function hasAmount(amount) {
+  return amount !== null && amount !== undefined && amount !== "";
+}
+
+function sumEnteredAmounts(items, field) {
+  const amounts = items.map((item) => item[field]).filter(hasAmount);
+  return amounts.length ? amounts.reduce((total, amount) => total + amount, 0) : null;
+}
+
 function formatDate(date) {
   if (!date) return "未填写";
   return new Intl.DateTimeFormat("zh-CN").format(new Date(`${date}T00:00:00`));
@@ -19,6 +28,7 @@ function ExpenseEditor({ item, onClose, onSave }) {
   const [date, setDate] = useState(item?.date ?? "");
   const [quantity, setQuantity] = useState(item?.quantity ?? "");
   const [referenceAmount, setReferenceAmount] = useState(item?.referenceAmount ?? "");
+  const [actualAmount, setActualAmount] = useState(item?.actualAmount ?? "");
   const [link, setLink] = useState(item?.link ?? "");
   const [note, setNote] = useState(item?.note ?? "");
   const [error, setError] = useState("");
@@ -52,6 +62,15 @@ function ExpenseEditor({ item, onClose, onSave }) {
       }
     }
 
+    let savedActualAmount = null;
+    if (actualAmount !== "") {
+      savedActualAmount = Number(actualAmount);
+      if (!Number.isFinite(savedActualAmount) || savedActualAmount < 0) {
+        setError("实际总额请填写不小于 0 的金额，或留空。");
+        return;
+      }
+    }
+
     const trimmedLink = link.trim();
     if (trimmedLink) {
       try {
@@ -70,6 +89,7 @@ function ExpenseEditor({ item, onClose, onSave }) {
       date,
       quantity: savedQuantity,
       referenceAmount: savedReferenceAmount,
+      actualAmount: savedActualAmount,
       link: trimmedLink,
       note: note.trim(),
     });
@@ -82,7 +102,7 @@ function ExpenseEditor({ item, onClose, onSave }) {
         <div className="modal-head">
           <div>
             <h2 id="expense-modal-title">{item ? "编辑购买信息" : "添加购买信息"}</h2>
-            <p>只记录计划和参考金额；外部购买由你自行处理。</p>
+            <p>记录计划参考信息和手动登记的实际金额；外部购买由你自行处理。</p>
           </div>
           <button type="button" className="modal-x" aria-label="关闭" onClick={onClose}>×</button>
         </div>
@@ -111,6 +131,10 @@ function ExpenseEditor({ item, onClose, onSave }) {
               <div className="form-field">
                 <label htmlFor="expense-reference-amount">参考总额（元）</label>
                 <input id="expense-reference-amount" className="input" type="number" min="0" step="0.01" value={referenceAmount} onChange={(event) => setReferenceAmount(event.target.value)} placeholder="可留空" />
+              </div>
+              <div className="form-field">
+                <label htmlFor="expense-actual-amount">实际总额（元）</label>
+                <input id="expense-actual-amount" className="input" type="number" min="0" step="0.01" value={actualAmount} onChange={(event) => setActualAmount(event.target.value)} placeholder="未记录可留空" />
               </div>
               <div className="form-field">
                 <label htmlFor="expense-link">外部购买链接</label>
@@ -147,8 +171,12 @@ function ExpenseCard({ item, canEdit, onEdit, onDelete }) {
         <div><dt>计划日期</dt><dd>{formatDate(item.date)}</dd></div>
         <div><dt>数量</dt><dd>{item.quantity ?? "未填写"}</dd></div>
         <div><dt>参考总额</dt><dd>{formatAmount(item.referenceAmount)}</dd></div>
+        <div><dt>实际总额</dt><dd>{formatAmount(item.actualAmount)}</dd></div>
         <div className="expense-item-note"><dt>备注</dt><dd>{item.note || "未填写"}</dd></div>
       </dl>
+      <p className={`tiny expense-record-status${hasAmount(item.actualAmount) ? " is-recorded" : " is-incomplete"}`}>
+        {hasAmount(item.actualAmount) ? "实际金额由你登记，外部交易未经核验。" : "记录不完整：实际金额未填写；不能据此判断是否已付款。"}
+      </p>
       {item.link && <a className="btn small expense-external-link" href={item.link} target="_blank" rel="noreferrer">打开外部供应方页面 ↗</a>}
       <p className="tiny expense-external-note">参考金额仅供计划，不代表已购买或已付款。外部链接会离开途见。</p>
     </article>
@@ -158,6 +186,12 @@ function ExpenseCard({ item, canEdit, onEdit, onDelete }) {
 export default function Expenses({ trip, canEdit, canCreateTrip, onSaveItems, onCreateTrip }) {
   const [editor, setEditor] = useState(null);
   const items = trip?.expenses ?? [];
+  const referenceTotal = sumEnteredAmounts(items, "referenceAmount");
+  const actualTotal = sumEnteredAmounts(items, "actualAmount");
+  const incompleteActualCount = items.filter((item) => !hasAmount(item.actualAmount)).length;
+  const budgetDifference = trip && hasAmount(trip.budget) && hasAmount(actualTotal)
+    ? trip.budget - actualTotal
+    : null;
 
   if (!trip) {
     return (
@@ -186,7 +220,18 @@ export default function Expenses({ trip, canEdit, canCreateTrip, onSaveItems, on
         <div><div className="eyebrow">PURCHASE NOTES</div><h1>购买信息</h1><p>整理计划项目、参考总额和外部供应方链接，不处理站内交易。</p></div>
         <div className="intro-actions"><button type="button" className="btn primary" disabled={!canEdit} onClick={() => setEditor({ item: null })}>＋ 添加项目</button></div>
       </div>
-      <div className="notice expense-trip-context"><strong>当前旅行：</strong>{trip.name}<span>参考金额和外部链接不会更新购买状态。</span></div>
+      <section className="expense-summary" aria-label="旅行费用汇总">
+        <div><span>总预算</span><strong>{formatAmount(trip.budget)}</strong></div>
+        <div><span>参考费用合计</span><strong>{formatAmount(referenceTotal)}</strong></div>
+        <div><span>实际费用合计（已登记）</span><strong>{formatAmount(actualTotal)}</strong></div>
+        <div><span>预算差额（按已登记实际金额）</span><strong>{formatAmount(budgetDifference)}</strong></div>
+      </section>
+      {incompleteActualCount > 0 && (
+        <div className="notice expense-incomplete-notice" role="status">
+          费用记录未完整：{incompleteActualCount} 项尚未填写实际金额。实际费用合计仅包含已填写的金额。
+        </div>
+      )}
+      <div className="notice expense-trip-context"><strong>当前旅行：</strong>{trip.name}<span>参考金额和外部链接不会更新购买状态；实际金额由你手动登记，未核验外部交易。</span></div>
       {items.length ? (
         <div className="expense-item-list">
           {items.map((item) => <ExpenseCard key={item.id} item={item} canEdit={canEdit} onEdit={(value) => setEditor({ item: value })} onDelete={deleteItem} />)}

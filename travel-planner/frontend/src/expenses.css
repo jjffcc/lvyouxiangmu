@@ -1,16 +1,24 @@
 .expense-trip-context{display:flex;gap:6px;align-items:center;margin:0 0 16px;flex-wrap:wrap}
 .expense-trip-context span{margin-left:auto;color:#66758c}
+.expense-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0 0 12px}
+.expense-summary>div{display:grid;gap:6px;min-width:0;padding:14px 16px;border:1px solid #e8edf5;border-radius:12px;background:#fff}
+.expense-summary span{color:#7b899d;font-size:10px}
+.expense-summary strong{color:#2d4567;font-size:16px;overflow-wrap:anywhere}
+.expense-incomplete-notice{margin:0 0 12px;color:#875b22;background:#fff8e9;border-color:#f1dfb9}
 .expense-item-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .expense-item-card{min-width:0;padding:16px 18px}
 .expense-item-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
 .expense-item-heading h3{margin:5px 0 0;color:#2a3d58;font-size:14px;overflow-wrap:anywhere}
 .expense-item-actions{display:flex;gap:6px;flex-shrink:0}
 .expense-item-actions .btn.danger{border-color:transparent}
-.expense-item-details{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin:15px 0 0;padding-top:13px;border-top:1px solid #edf0f5}
+.expense-item-details{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin:15px 0 0;padding-top:13px;border-top:1px solid #edf0f5}
 .expense-item-details div{min-width:0}
 .expense-item-details dt{color:#8794a7;font-size:10px}
 .expense-item-details dd{margin:5px 0 0;color:#40536d;font-size:11px;line-height:1.6;overflow-wrap:anywhere;white-space:pre-wrap}
 .expense-item-details .expense-item-note{grid-column:1/-1}
+.expense-record-status{margin:11px 0 0;line-height:1.6}
+.expense-record-status.is-incomplete{color:#9a6420}
+.expense-record-status.is-recorded{color:#6b7d94}
 .expense-external-link{margin-top:12px}
 .expense-external-note{margin:9px 0 0;line-height:1.6}
 .expense-empty-state{display:grid;justify-items:center;gap:9px;padding:42px 16px}
@@ -24,5 +32,5 @@
 .expense-item-actions .btn:focus-visible,.expense-external-link:focus-visible{outline:2px solid #3476df;outline-offset:2px}
 .trip-mobile-nav{grid-template-columns:repeat(4,minmax(0,1fr))}
 @media(max-width:1050px){.expense-item-list{grid-template-columns:1fr}}
-@media(max-width:760px){.expense-trip-context span{margin-left:0}.expense-item-card{padding:14px}.expense-item-details{grid-template-columns:1fr 1fr;gap:11px}.expense-item-details .expense-item-note{grid-column:1/-1}}
+@media(max-width:760px){.expense-trip-context span{margin-left:0}.expense-summary{grid-template-columns:1fr}.expense-item-card{padding:14px}.expense-item-details{grid-template-columns:1fr 1fr;gap:11px}.expense-item-details .expense-item-note{grid-column:1/-1}}
 @media(max-width:420px){.expense-form-grid{grid-template-columns:1fr}.expense-item-heading{flex-direction:column}.expense-item-actions{width:100%}.expense-item-actions .btn{flex:1}}
