@@ -189,9 +189,6 @@ export default function Expenses({ trip, canEdit, canCreateTrip, onSaveItems, on
   const referenceTotal = sumEnteredAmounts(items, "referenceAmount");
   const actualTotal = sumEnteredAmounts(items, "actualAmount");
   const incompleteActualCount = items.filter((item) => !hasAmount(item.actualAmount)).length;
-  const budgetDifference = trip && hasAmount(trip.budget) && hasAmount(actualTotal)
-    ? trip.budget - actualTotal
-    : null;
 
   if (!trip) {
     return (
@@ -224,7 +221,6 @@ export default function Expenses({ trip, canEdit, canCreateTrip, onSaveItems, on
         <div><span>总预算</span><strong>{formatAmount(trip.budget)}</strong></div>
         <div><span>参考费用合计</span><strong>{formatAmount(referenceTotal)}</strong></div>
         <div><span>实际费用合计（已登记）</span><strong>{formatAmount(actualTotal)}</strong></div>
-        <div><span>预算差额（按已登记实际金额）</span><strong>{formatAmount(budgetDifference)}</strong></div>
       </section>
       {incompleteActualCount > 0 && (
         <div className="notice expense-incomplete-notice" role="status">

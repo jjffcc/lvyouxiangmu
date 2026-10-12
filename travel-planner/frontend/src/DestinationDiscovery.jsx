@@ -56,6 +56,13 @@ export default function DestinationDiscovery({ tripDestinations, trip, onToggleF
                   <span>{item.season}</span><span>{item.duration}</span><span>{item.cost}</span>
                 </div>
                 <div className="feature-actions">
+                  <a
+                    className="btn small"
+                    href={`https://uri.amap.com/search?keyword=${encodeURIComponent(item.name)}&city=${encodeURIComponent(city)}&view=map&src=lvyouxiangmu&callnative=0`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`在高德地图查看${item.name}`}
+                  >地图查看</a>
                   <button type="button" className={`btn small${favoriteIds.includes(item.id) ? " soft" : ""}`} aria-pressed={favoriteIds.includes(item.id)} disabled={!trip} onClick={() => onToggleFavorite(item.id)}>
                     <span aria-hidden="true">{favoriteIds.includes(item.id) ? "★" : "☆"}</span> {favoriteIds.includes(item.id) ? "已收藏" : "收藏"}
                   </button>
