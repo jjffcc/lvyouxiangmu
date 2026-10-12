@@ -1,4 +1,5 @@
 import { useState } from "react";
+import DestinationMap from "./DestinationMap.jsx";
 import "./destination-discovery.css";
 
 const categories = ["全部", "人文", "自然景观", "美食", "钓鱼", "地理特色", "其他"];
@@ -17,6 +18,7 @@ const demoCities = ["杭州", "苏州", "上海"];
 
 export default function DestinationDiscovery({ tripDestinations, trip, onToggleFavorite }) {
   const [city, setCity] = useState("杭州");
+  const [cityInput, setCityInput] = useState("杭州");
   const [category, setCategory] = useState("全部");
   const cities = [...new Set([...demoCities, ...tripDestinations])];
   const results = destinationFeatures.filter((item) => item.city === city && (category === "全部" || item.category === category));
@@ -28,13 +30,26 @@ export default function DestinationDiscovery({ tripDestinations, trip, onToggleF
         <div><div className="eyebrow">DESTINATION NOTES</div><h1>目的地发现</h1><p>先了解一座城市，再按兴趣浏览可用的特色资料。</p></div>
       </div>
 
-      <div className="city-switchbar">
+      <form className="city-switchbar destination-city-form" onSubmit={(event) => {
+        event.preventDefault();
+        if (cityInput.trim()) setCity(cityInput.trim());
+      }}>
         <label htmlFor="discovery-city">当前浏览城市</label>
-        <select id="discovery-city" className="select" value={city} onChange={(event) => setCity(event.target.value)}>
-          {cities.map((item) => <option key={item} value={item}>{item}</option>)}
-        </select>
-        <span>仅切换本页内容，不会更改旅行档案或行程</span>
-      </div>
+        <input
+          id="discovery-city"
+          className="destination-city-input"
+          list="discovery-city-suggestions"
+          value={cityInput}
+          onChange={(event) => setCityInput(event.target.value)}
+          placeholder="输入国内城市"
+          required
+        />
+        <datalist id="discovery-city-suggestions">
+          {cities.map((item) => <option key={item} value={item} />)}
+        </datalist>
+        <button type="submit" className="btn small">切换城市</button>
+        <span>仅切换本页内容与地图查询，不会更改旅行档案或行程</span>
+      </form>
       <p className="tiny destination-favorite-context">收藏归属：{trip ? `当前旅行「${trip.name}」` : "请先创建旅行档案"}</p>
 
       <div className="toolbar destination-category-list" aria-label="目的地特色分类">
@@ -81,6 +96,8 @@ export default function DestinationDiscovery({ tripDestinations, trip, onToggleF
       )}
 
       <div className="notice destination-notice">页面中的特色条目是演示参考资料；开放、预约、价格和体验条件请出发前核实。</div>
+
+      <DestinationMap city={city} />
     </>
   );
 }
