@@ -106,6 +106,7 @@ function TripEditor({ trip, reuseSource, onClose, onSave }) {
       preferences: preferences.trim(),
       ...(reuseSource ? {
         favoriteDestinationIds: [...(reuseSource.favoriteDestinationIds ?? [])],
+        favoriteFoodPoiIds: [...(reuseSource.favoriteFoodPoiIds ?? [])],
         itineraryItems: (reuseSource.itineraryItems ?? []).map((item) => ({ ...item, id: crypto.randomUUID() })),
       } : {}),
     });
