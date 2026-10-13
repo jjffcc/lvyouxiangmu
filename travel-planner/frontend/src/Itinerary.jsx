@@ -1,4 +1,5 @@
 import { useState } from "react";
+import DailyRoute from "./DailyRoute.jsx";
 import "./itinerary.css";
 
 const itemCategories = ["景点", "餐饮", "住宿", "交通"];
@@ -213,6 +214,10 @@ export default function Itinerary({ trip, canEdit, onSaveItems, onCreateTrip, ca
           <div className="empty itinerary-empty-state"><strong>这一天还没有安排</strong><span>添加第一项活动、用餐、住宿或交通事项。</span><button type="button" className="btn primary" disabled={!canEdit || !isWithinTripDates(selectedDate, trip)} onClick={() => setEditor({ item: null })}>添加第一项</button></div>
         )}
       </section>
+
+      {selectedDate && isWithinTripDates(selectedDate, trip) && (
+        <DailyRoute key={selectedDate} trip={trip} selectedDate={selectedDate} dayItems={dayItems} />
+      )}
 
       {outOfRangeItems.length > 0 && (
         <section className="itinerary-out-of-range">
