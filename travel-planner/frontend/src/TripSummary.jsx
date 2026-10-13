@@ -1,3 +1,4 @@
+import { useRef, useState } from "react";
 import { formatAmount, hasAmount, sumEnteredAmounts } from "./Expenses.jsx";
 import { maskPhone } from "./Preparation.jsx";
 import "./trip-summary.css";
@@ -202,10 +203,67 @@ function PreparationSection({ trip, onNavigate }) {
 }
 
 export default function TripSummary({ trip, onCreateTrip, onNavigate }) {
+  const summaryRef = useRef(null);
+  const [pdfStatus, setPdfStatus] = useState(null);
+  const [exportingPdf, setExportingPdf] = useState(false);
+
+  async function exportPdf() {
+    if (!summaryRef.current || exportingPdf) return;
+
+    setExportingPdf(true);
+    setPdfStatus(null);
+    let host;
+    try {
+      await document.fonts.ready;
+      const summary = summaryRef.current.cloneNode(true);
+      summary.classList.add("trip-summary-pdf");
+      summary.querySelectorAll("[data-pdf-exclude], button").forEach((element) => element.remove());
+      summary.querySelectorAll(".trip-summary-day").forEach((day) => {
+        const date = day.querySelector(".trip-summary-day-head h3")?.textContent?.trim();
+        day.querySelectorAll(".trip-summary-item-title").forEach((title) => {
+          const dateLabel = document.createElement("span");
+          dateLabel.className = "trip-summary-pdf-item-date";
+          dateLabel.textContent = date;
+          title.prepend(dateLabel);
+        });
+      });
+
+      host = document.createElement("div");
+      host.className = "trip-summary-pdf-host";
+      host.append(summary);
+      document.body.append(host);
+      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
+      const { default: html2pdf } = await import("html2pdf.js");
+      const filename = `${trip.name.trim().replace(/[\\/:*?"<>|]/g, "_") || "旅行计划"}.pdf`;
+      await html2pdf().set({
+        margin: [10, 10, 12, 10],
+        filename,
+        image: { type: "jpeg", quality: 0.96 },
+        html2canvas: { scale: 1.5, backgroundColor: "#ffffff", logging: false },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+        pagebreak: {
+          mode: ["css", "legacy"],
+          avoid: [".trip-summary-hero", ".trip-summary-itinerary-item", ".trip-summary-expense", ".trip-summary-checklist li"],
+        },
+      }).from(summary).save();
+      setPdfStatus({ type: "success", message: "PDF 已生成并下载到本机。" });
+    } catch {
+      setPdfStatus({ type: "error", message: "PDF 导出失败，请稍后重试。" });
+    } finally {
+      host?.remove();
+      setExportingPdf(false);
+    }
+  }
+
   return (
-    <div className="trip-summary-page">
+    <div className="trip-summary-page" ref={summaryRef}>
       <div className="page-intro">
         <div><div className="eyebrow">YOUR COMPLETE TRIP</div><h1>完整旅行计划</h1><p>只读汇总当前旅行资料；修改档案后，这里会显示最新内容。</p></div>
+        {trip && <div className="trip-summary-export" data-pdf-exclude>
+          <button type="button" className="btn primary" onClick={exportPdf} disabled={exportingPdf}>{exportingPdf ? "正在生成 PDF…" : "导出 PDF"}</button>
+          {pdfStatus && <p className={`trip-summary-export-status is-${pdfStatus.type}`} role={pdfStatus.type === "error" ? "alert" : "status"}>{pdfStatus.message}</p>}
+        </div>}
       </div>
       {!trip ? (
         <div className="empty trip-empty-state"><strong>还没有旅行档案</strong><span>创建旅行后，这里会汇总行程、费用和出行准备。</span><button type="button" className="btn primary" onClick={onCreateTrip}>创建旅行档案</button></div>
