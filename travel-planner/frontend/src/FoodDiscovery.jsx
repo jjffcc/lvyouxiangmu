@@ -27,6 +27,7 @@ export default function FoodDiscovery({ tripDestinations, trip, canFavorite = tr
   const [searchState, setSearchState] = useState("loading");
   const [queryTime, setQueryTime] = useState("");
   const [retryCount, setRetryCount] = useState(0);
+  const [mapMessage, setMapMessage] = useState("");
   const requestIdRef = useRef(0);
 
   useEffect(() => {
@@ -93,6 +94,7 @@ export default function FoodDiscovery({ tripDestinations, trip, canFavorite = tr
     const nextCity = cityInput.trim();
     if (!nextCity) return;
     setCityInput(nextCity);
+    setMapMessage("");
     if (nextCity === city) setRetryCount((count) => count + 1);
     else setCity(nextCity);
   }
@@ -150,18 +152,32 @@ export default function FoodDiscovery({ tripDestinations, trip, canFavorite = tr
         ) : (
           <div className="food-place-list" aria-live="polite">
             {places.map((poi, index) => {
+              const placeName = typeof poi.name === "string" ? poi.name.trim() : "";
               const location = getPlaceLocation(poi);
               const poiId = typeof poi.id === "string" ? poi.id.trim() : "";
               const isFavorite = poiId && favoriteFoodPoiIds.includes(poiId);
+              const mapSearchHref = placeName
+                ? `https://uri.amap.com/search?keyword=${encodeURIComponent(placeName)}&city=${encodeURIComponent(city)}&view=map&src=lvyouxiangmu&callnative=0`
+                : "";
               return (
                 <article className="card food-place-card" key={poi.id || `${poi.name || "餐饮地点"}-${index}`}>
                   <span className="sample-label">高德餐饮 POI</span>
-                  <h3>{poi.name || "高德未提供店铺名称"}</h3>
+                  <h3>{placeName || "高德未提供店铺名称"}</h3>
                   {poi.type && <p className="food-place-type">{poi.type}</p>}
                   <p className={`food-place-location${location ? "" : " unavailable"}`}>
                     {location || "高德未返回地点信息"}
                   </p>
                   <div className="food-place-actions">
+                    {mapSearchHref ? (
+                      <a
+                        className="btn small"
+                        href={mapSearchHref}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`在高德地图搜索${placeName}，城市：${city}`}
+                        onClick={() => setMapMessage(`已在新标签打开高德地图搜索“${placeName} · ${city}”。若页面未打开，请使用当前卡片中的店铺名称和地点信息自行搜索。`)}
+                      >高德地图搜索</a>
+                    ) : <span className="tiny">高德未提供店铺名称，无法发起地图搜索。</span>}
                     <button
                       type="button"
                       className={`btn small${isFavorite ? " soft" : ""}`}
@@ -177,7 +193,8 @@ export default function FoodDiscovery({ tripDestinations, trip, canFavorite = tr
           </div>
         )}
 
-        <div className="notice food-results-notice">营业状态、价格和菜单等信息可能变化，请以高德或商家当前信息为准；本页不会保存高德返回的店铺资料。</div>
+        {mapMessage && <p className="food-map-feedback" role="status">{mapMessage}</p>}
+        <div className="notice food-results-notice">营业状态、价格和菜单等信息可能变化，请以高德或商家当前信息为准；本页不会保存高德返回的店铺资料。地图搜索在新标签打开，如无法打开，请使用店铺名称和地点信息自行核实；跳转不代表预订或购买。</div>
       </section>
     </>
   );

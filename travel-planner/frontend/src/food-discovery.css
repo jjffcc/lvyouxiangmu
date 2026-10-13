@@ -14,6 +14,7 @@
 .food-place-location.unavailable{color:#9aa5b4}
 .food-favorite-context{margin:8px 0 0}
 .food-place-actions{display:flex;align-items:center;gap:8px;margin-top:12px}
+.food-map-feedback{margin:10px 0 0;color:#52647b;font-size:11px;line-height:1.6}
 .food-query-state{display:grid;justify-items:center;gap:9px;min-height:150px;padding:30px 16px;text-align:center}
 .food-query-state strong{color:#52647c;font-size:13px}
 .food-query-state span{font-size:10px}
