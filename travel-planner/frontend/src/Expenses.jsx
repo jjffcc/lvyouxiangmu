@@ -3,16 +3,16 @@ import "./expenses.css";
 
 const expenseCategories = ["交通", "住宿", "门票", "餐饮", "租车", "其他"];
 
-function formatAmount(amount) {
+export function formatAmount(amount) {
   if (amount === null || amount === undefined || amount === "") return "未填写";
   return new Intl.NumberFormat("zh-CN", { style: "currency", currency: "CNY", maximumFractionDigits: 2 }).format(amount);
 }
 
-function hasAmount(amount) {
+export function hasAmount(amount) {
   return amount !== null && amount !== undefined && amount !== "";
 }
 
-function sumEnteredAmounts(items, field) {
+export function sumEnteredAmounts(items, field) {
   const amounts = items.map((item) => item[field]).filter(hasAmount);
   return amounts.length ? amounts.reduce((total, amount) => total + amount, 0) : null;
 }

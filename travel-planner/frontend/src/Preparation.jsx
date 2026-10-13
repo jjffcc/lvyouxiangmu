@@ -193,7 +193,7 @@ function ChecklistCard({ items, canEdit, onToggle, onAdd, onEdit, onDelete }) {
   );
 }
 
-function maskPhone(phone) {
+export function maskPhone(phone) {
   const digits = phone.replace(/\D/g, "");
   if (!digits) return "未填写";
   if (digits.length <= 4) return "•".repeat(digits.length);
