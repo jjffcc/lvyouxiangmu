@@ -17,7 +17,7 @@ function getPlaceLocation(poi) {
     .join("");
 }
 
-export default function FoodDiscovery({ tripDestinations, trip }) {
+export default function FoodDiscovery({ tripDestinations, trip, canFavorite = true, onToggleFavorite }) {
   const initialCity = trip?.destinations?.[0] || "杭州";
   const [city, setCity] = useState(initialCity);
   const [cityInput, setCityInput] = useState(initialCity);
@@ -98,6 +98,7 @@ export default function FoodDiscovery({ tripDestinations, trip }) {
   }
 
   const citySuggestions = [...new Set(tripDestinations.filter(Boolean))];
+  const favoriteFoodPoiIds = trip?.favoriteFoodPoiIds ?? [];
 
   return (
     <>
@@ -122,6 +123,7 @@ export default function FoodDiscovery({ tripDestinations, trip }) {
         <button type="submit" className="btn small">切换城市</button>
         <span>仅改变本页查询，不会修改旅行目的地或行程</span>
       </form>
+      <p className="tiny food-favorite-context">收藏归属：{trip ? `当前旅行「${trip.name}」` : "请先创建旅行档案"}</p>
 
       <section className="food-results-section" aria-labelledby="food-results-title">
         <div className="section-head food-results-heading">
@@ -149,6 +151,8 @@ export default function FoodDiscovery({ tripDestinations, trip }) {
           <div className="food-place-list" aria-live="polite">
             {places.map((poi, index) => {
               const location = getPlaceLocation(poi);
+              const poiId = typeof poi.id === "string" ? poi.id.trim() : "";
+              const isFavorite = poiId && favoriteFoodPoiIds.includes(poiId);
               return (
                 <article className="card food-place-card" key={poi.id || `${poi.name || "餐饮地点"}-${index}`}>
                   <span className="sample-label">高德餐饮 POI</span>
@@ -157,6 +161,16 @@ export default function FoodDiscovery({ tripDestinations, trip }) {
                   <p className={`food-place-location${location ? "" : " unavailable"}`}>
                     {location || "高德未返回地点信息"}
                   </p>
+                  <div className="food-place-actions">
+                    <button
+                      type="button"
+                      className={`btn small${isFavorite ? " soft" : ""}`}
+                      aria-pressed={Boolean(isFavorite)}
+                      disabled={!trip || !canFavorite || !poiId}
+                      onClick={() => onToggleFavorite(poiId)}
+                    >{isFavorite ? "已收藏" : "收藏"}</button>
+                    {!poiId && <span className="tiny">高德未提供地点标识，无法收藏。</span>}
+                  </div>
                 </article>
               );
             })}

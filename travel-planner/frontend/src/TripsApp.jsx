@@ -292,6 +292,22 @@ export default function TripsApp({ account, onLogout, logoutPending, message }) 
     }
   }
 
+  function toggleFoodFavorite(poiId) {
+    if (!selectedTrip || loadError || !poiId) return;
+    const favoriteFoodPoiIds = selectedTrip.favoriteFoodPoiIds ?? [];
+    const isFavorite = favoriteFoodPoiIds.includes(poiId);
+    const updatedTrip = {
+      ...selectedTrip,
+      favoriteFoodPoiIds: isFavorite
+        ? favoriteFoodPoiIds.filter((id) => id !== poiId)
+        : [...favoriteFoodPoiIds, poiId],
+    };
+    const nextTrips = trips.map((trip) => trip.id === selectedTrip.id ? updatedTrip : trip);
+    if (saveTrips(nextTrips)) {
+      setStatusMessage(isFavorite ? "已从当前旅行取消美食收藏。" : "已收藏到当前旅行。 ");
+    }
+  }
+
   function saveItineraryItems(itineraryItems) {
     if (!selectedTrip || loadError) return false;
     const nextTrips = trips.map((trip) => trip.id === selectedTrip.id ? { ...trip, itineraryItems } : trip);
@@ -410,6 +426,8 @@ export default function TripsApp({ account, onLogout, logoutPending, message }) 
             <FoodDiscovery
               tripDestinations={trips.flatMap((trip) => trip.destinations)}
               trip={selectedTrip}
+              canFavorite={!loadError}
+              onToggleFavorite={toggleFoodFavorite}
             />
           ) : activePage === "itinerary" ? (
             <Itinerary
