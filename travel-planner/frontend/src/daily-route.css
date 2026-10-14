@@ -1,0 +1,23 @@
+.daily-route-section{margin-top:24px;padding:20px;border:1px solid #e5ebf4;border-radius:14px;background:#fff}
+.daily-route-section>.section-head{align-items:flex-start}
+.daily-route-section>.section-head h2{margin:0;color:#2a3d58;font-size:15px}
+.daily-route-section>.section-head p{margin:5px 0 0;color:#8995a7;font-size:11px;line-height:1.6}
+.daily-route-source{color:#7b899c;font-size:10px;white-space:nowrap}
+.daily-route-controls{display:flex;align-items:end;gap:12px;margin-top:16px;flex-wrap:wrap}
+.daily-route-field{display:grid;gap:6px;min-width:165px}
+.daily-route-field label{color:#53647b;font-size:11px;font-weight:600}
+.daily-route-field .select{height:38px}
+.daily-route-city-context{margin:0 4px 10px 0;color:#687b96;font-size:11px}
+.daily-route-feedback{margin:13px 0 0;color:#687b96;font-size:11px;line-height:1.7}
+.daily-route-feedback.is-error{color:#a34d43}
+.daily-route-feedback ul{margin:6px 0 0;padding-left:20px}
+.daily-route-results{display:grid;gap:9px;margin-top:16px}
+.daily-route-query-time{margin:0;color:#7b899c;font-size:10px;line-height:1.6}
+.daily-route-segment{padding:13px 14px;border:1px solid #edf0f5;border-radius:10px;background:#fbfcfe}
+.daily-route-segment-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.daily-route-segment-heading strong{color:#2f4664;font-size:12px;overflow-wrap:anywhere}
+.daily-route-segment-heading span{flex-shrink:0;color:#8794a7;font-size:10px}
+.daily-route-resolved-address{margin:7px 0 0;color:#8794a7;font-size:10px;line-height:1.6;overflow-wrap:anywhere}
+.daily-route-segment-details{display:flex;align-items:center;gap:14px;margin-top:10px;flex-wrap:wrap;color:#52647b;font-size:11px}
+.daily-route-segment-details .btn{margin-left:auto}
+@media(max-width:600px){.daily-route-section{padding:15px}.daily-route-section>.section-head{flex-direction:column;gap:7px}.daily-route-controls{align-items:stretch}.daily-route-field{flex:1;min-width:130px}.daily-route-controls>.btn{width:100%}.daily-route-segment-details .btn{width:100%;margin-left:0}}

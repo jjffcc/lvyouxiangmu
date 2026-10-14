@@ -1,0 +1,18 @@
+.destination-category-list{margin-top:14px;margin-bottom:16px}
+.destination-favorite-context{margin:8px 0 14px}
+.destination-feature-list .feature-card{min-height:166px}
+.destination-feature-list .feature-visual{display:flex;align-items:flex-start;justify-content:flex-end;padding:11px;background:linear-gradient(150deg,#b9d5ed,#88b3d2 52%,#e5d7b5)}
+.destination-feature-list .feature-visual.v2{background:linear-gradient(145deg,#bad8c4,#7bab91 53%,#e4ddb9)}
+.destination-feature-list .feature-visual.v3{background:linear-gradient(145deg,#f2d7b7,#d89c70 54%,#f2e3c9)}
+.destination-feature-list .feature-visual .visual-icon{position:relative;right:auto;top:auto;color:#fff;background:#ffffff44;border:1px solid #ffffff5c;border-radius:9px;width:28px;height:28px;display:grid;place-items:center;font-size:12px;font-weight:700}
+.destination-feature-list .feature-copy h2{font-size:13px;margin:5px 0;color:#2a3d58}
+.destination-feature-list .feature-copy p{margin-bottom:7px}
+.destination-feature-list .feature-actions{display:flex;gap:8px;margin-top:9px}
+.destination-reference{margin-top:8px}
+.destination-empty-state{display:grid;justify-items:center;gap:9px;padding:42px 16px}
+.destination-empty-state strong{color:#52647c;font-size:13px}
+.destination-empty-state span{font-size:10px}
+.destination-notice{margin-top:18px}
+.trip-mobile-nav{grid-template-columns:repeat(2,minmax(0,1fr))}
+.trip-mobile-nav .nav-item{min-height:51px}
+@media(max-width:760px){.destination-category-list{flex-wrap:nowrap;overflow-x:auto;padding-bottom:5px}.destination-category-list .chip{flex:none}.destination-feature-list{grid-template-columns:1fr}.destination-feature-list .feature-card{min-height:136px}}
