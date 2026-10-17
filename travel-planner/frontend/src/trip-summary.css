@@ -1,4 +1,5 @@
 .trip-summary-page{display:grid;gap:18px}
+.trip-summary-preview-title{margin:0 0 6px;color:#253a59;font-size:20px}
 .trip-summary-hero{padding:22px;background:linear-gradient(135deg,#fff,#f7faff)}
 .trip-summary-hero-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .trip-summary-hero h2{margin:9px 0 15px;color:#253a59;font-size:22px;overflow-wrap:anywhere}
@@ -73,7 +74,7 @@
 .trip-summary-pdf-host{position:fixed;top:0;left:-10000px;z-index:-1;width:718px;background:#fff}
 .trip-summary-page.trip-summary-pdf{width:718px;max-width:none;gap:13px;background:#fff;color:#30435e}
 .trip-summary-pdf .page-intro{margin:0 0 2px}
-.trip-summary-pdf .page-intro h1{font-size:22px}
+.trip-summary-pdf .page-intro h1,.trip-summary-pdf .page-intro h2{font-size:22px}
 .trip-summary-pdf .page-intro p{font-size:12px}
 .trip-summary-pdf .trip-summary-hero,.trip-summary-pdf .trip-summary-section{box-shadow:none}
 .trip-summary-pdf .trip-summary-hero,.trip-summary-pdf .trip-summary-itinerary-item,.trip-summary-pdf .trip-summary-expense,.trip-summary-pdf .trip-summary-list li{break-inside:avoid;page-break-inside:avoid}

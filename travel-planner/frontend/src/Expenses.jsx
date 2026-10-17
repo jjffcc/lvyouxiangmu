@@ -185,7 +185,9 @@ function ExpenseCard({ item, canEdit, onEdit, onDelete }) {
 
 export default function Expenses({ trip, canEdit, canCreateTrip, onSaveItems, onCreateTrip }) {
   const [editor, setEditor] = useState(null);
+  const [category, setCategory] = useState("全部");
   const items = trip?.expenses ?? [];
+  const visibleItems = category === "全部" ? items : items.filter((item) => item.category === category);
   const referenceTotal = sumEnteredAmounts(items, "referenceAmount");
   const actualTotal = sumEnteredAmounts(items, "actualAmount");
   const incompleteActualCount = items.filter((item) => !hasAmount(item.actualAmount)).length;
@@ -228,10 +230,30 @@ export default function Expenses({ trip, canEdit, canCreateTrip, onSaveItems, on
         </div>
       )}
       <div className="notice expense-trip-context"><strong>当前旅行：</strong>{trip.name}<span>参考金额和外部链接不会更新购买状态；实际金额由你手动登记，未核验外部交易。</span></div>
-      {items.length ? (
+      <section className="card expense-category-summary" aria-labelledby="expense-category-heading">
+        <h2 id="expense-category-heading">分类费用汇总</h2>
+        <p className="tiny">按当前旅行的全部项目分类合计；未填写金额保持未填写，不按零计算。</p>
+        <table>
+          <thead><tr><th scope="col">类别</th><th scope="col">参考总额</th><th scope="col">实际总额（已登记）</th></tr></thead>
+          <tbody>{expenseCategories.map((value) => {
+            const categoryItems = items.filter((item) => item.category === value);
+            return <tr key={value}><th scope="row">{value}</th><td>{formatAmount(sumEnteredAmounts(categoryItems, "referenceAmount"))}</td><td>{formatAmount(sumEnteredAmounts(categoryItems, "actualAmount"))}</td></tr>;
+          })}</tbody>
+        </table>
+      </section>
+      <div className="expense-category-filter">
+        <label htmlFor="expense-category-filter">查看费用类别</label>
+        <select id="expense-category-filter" className="select" value={category} onChange={(event) => setCategory(event.target.value)}>
+          {["全部", ...expenseCategories].map((value) => <option key={value} value={value}>{value}</option>)}
+        </select>
+        <span className="tiny">{visibleItems.length} 项 · 上方合计始终统计当前旅行全部项目</span>
+      </div>
+      {visibleItems.length ? (
         <div className="expense-item-list">
-          {items.map((item) => <ExpenseCard key={item.id} item={item} canEdit={canEdit} onEdit={(value) => setEditor({ item: value })} onDelete={deleteItem} />)}
+          {visibleItems.map((item) => <ExpenseCard key={item.id} item={item} canEdit={canEdit} onEdit={(value) => setEditor({ item: value })} onDelete={deleteItem} />)}
         </div>
+      ) : items.length ? (
+        <div className="empty expense-empty-state"><strong>当前类别还没有购买信息</strong><button type="button" className="btn small" onClick={() => setCategory("全部")}>查看全部项目</button></div>
       ) : (
         <div className="empty expense-empty-state"><strong>还没有购买信息</strong><span>添加一项计划后，数量、参考总额和供应方链接会保存在当前旅行中。</span><button type="button" className="btn primary" disabled={!canEdit} onClick={() => setEditor({ item: null })}>添加第一项</button></div>
       )}

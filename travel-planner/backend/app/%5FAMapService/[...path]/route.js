@@ -14,7 +14,7 @@ export async function GET(request, { params }) {
     return NextResponse.json({ message: "不支持的高德服务路径。" }, { status: 404 });
   }
 
-  const upstreamHost = servicePath === "v4/map/styles" ? "https://webapi.amap.com" : "https://sg-restapi.opnavi.com";
+  const upstreamHost = servicePath === "v4/map/styles" ? "https://webapi.amap.com" : "https://restapi.amap.com";
   const upstreamUrl = new URL(`/${servicePath}`, upstreamHost);
   const incomingUrl = new URL(request.url);
   incomingUrl.searchParams.forEach((value, key) => {

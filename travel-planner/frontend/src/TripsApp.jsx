@@ -238,6 +238,7 @@ export default function TripsApp({ account, onLogout, logoutPending, message }) 
   const [loadError, setLoadError] = useState(initial.error);
   const [selectedTripId, setSelectedTripId] = useState(initial.trips[0]?.id ?? null);
   const [activePage, setActivePage] = useState("trips");
+  const [foodCity, setFoodCity] = useState(null);
   const [editor, setEditor] = useState(null);
   const [statusMessage, setStatusMessage] = useState("");
   const selectedTrip = trips.find((trip) => trip.id === selectedTripId) ?? trips[0] ?? null;
@@ -350,6 +351,7 @@ export default function TripsApp({ account, onLogout, logoutPending, message }) 
         <nav className="nav-list" aria-label="主要导航">
           <button type="button" className={`nav-item${activePage === "trips" ? " active" : ""}`} onClick={() => setActivePage("trips")}><span className="ui-icon" aria-hidden="true">⌂</span>旅行总览</button>
           <button type="button" className={`nav-item${activePage === "summary" ? " active" : ""}`} onClick={() => setActivePage("summary")}>完整计划</button>
+          <button type="button" className={`nav-item${activePage === "export" ? " active" : ""}`} onClick={() => setActivePage("export")}>计划导出</button>
           <button type="button" className={`nav-item${activePage === "destinations" ? " active" : ""}`} onClick={() => setActivePage("destinations")}>目的地发现</button>
           <button type="button" className={`nav-item${activePage === "food" ? " active" : ""}`} onClick={() => setActivePage("food")}>当地美食</button>
           <button type="button" className={`nav-item${activePage === "itinerary" ? " active" : ""}`} onClick={() => setActivePage("itinerary")}>每日行程</button>
@@ -364,7 +366,7 @@ export default function TripsApp({ account, onLogout, logoutPending, message }) 
 
       <main className="workspace">
         <header className="topbar">
-          <div className="crumb">途见 <span aria-hidden="true">/</span> <strong>{activePage === "trips" ? "我的旅行" : activePage === "summary" ? "完整计划" : activePage === "destinations" ? "目的地发现" : activePage === "food" ? "当地美食" : activePage === "itinerary" ? "每日行程" : activePage === "expenses" ? "购买信息" : "出行准备"}</strong></div>
+          <div className="crumb">途见 <span aria-hidden="true">/</span> <strong>{activePage === "trips" ? "我的旅行" : activePage === "summary" ? "完整计划" : activePage === "export" ? "计划导出" : activePage === "destinations" ? "目的地发现" : activePage === "food" ? "当地美食" : activePage === "itinerary" ? "每日行程" : activePage === "expenses" ? "购买信息" : "出行准备"}</strong></div>
           <div className="top-actions">
             <span className="top-date">账户旅行资料独立保存</span>
             <button type="button" className="btn small" onClick={onLogout} disabled={logoutPending}>{logoutPending ? "正在退出…" : "退出登录"}</button>
@@ -419,9 +421,11 @@ export default function TripsApp({ account, onLogout, logoutPending, message }) 
               )}
               </>}
             </>
-          ) : activePage === "summary" ? (
+          ) : activePage === "summary" || activePage === "export" ? (
             <TripSummary
+              key={`${activePage}-${selectedTrip?.id ?? "no-selected-trip"}`}
               trip={selectedTrip}
+              exportPage={activePage === "export"}
               onCreateTrip={() => { setActivePage("trips"); setEditor({ trip: null }); }}
               onNavigate={setActivePage}
             />
@@ -430,9 +434,11 @@ export default function TripsApp({ account, onLogout, logoutPending, message }) 
               tripDestinations={trips.flatMap((trip) => trip.destinations)}
               trip={selectedTrip}
               onToggleFavorite={toggleDestinationFavorite}
+              onBrowseFood={(city) => { setFoodCity(city); setActivePage("food"); }}
             />
           ) : activePage === "food" ? (
             <FoodDiscovery
+              initialCity={foodCity ?? selectedTrip?.destinations?.[0] ?? "杭州"}
               tripDestinations={trips.flatMap((trip) => trip.destinations)}
               trip={selectedTrip}
               canFavorite={!loadError}
@@ -472,6 +478,7 @@ export default function TripsApp({ account, onLogout, logoutPending, message }) 
       <nav className="mobile-nav trip-mobile-nav" aria-label="主要导航">
         <button type="button" className={`nav-item${activePage === "trips" ? " active" : ""}`} onClick={() => setActivePage("trips")}>旅行总览</button>
         <button type="button" className={`nav-item${activePage === "summary" ? " active" : ""}`} onClick={() => setActivePage("summary")}>完整计划</button>
+        <button type="button" className={`nav-item${activePage === "export" ? " active" : ""}`} onClick={() => setActivePage("export")}>计划导出</button>
         <button type="button" className={`nav-item${activePage === "destinations" ? " active" : ""}`} onClick={() => setActivePage("destinations")}>目的地发现</button>
         <button type="button" className={`nav-item${activePage === "food" ? " active" : ""}`} onClick={() => setActivePage("food")}>当地美食</button>
         <button type="button" className={`nav-item${activePage === "itinerary" ? " active" : ""}`} onClick={() => setActivePage("itinerary")}>每日行程</button>

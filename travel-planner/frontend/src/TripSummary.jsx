@@ -202,7 +202,7 @@ function PreparationSection({ trip, onNavigate }) {
   );
 }
 
-export default function TripSummary({ trip, onCreateTrip, onNavigate }) {
+export default function TripSummary({ trip, onCreateTrip, onNavigate, exportPage = false }) {
   const summaryRef = useRef(null);
   const [pdfStatus, setPdfStatus] = useState(null);
   const [exportingPdf, setExportingPdf] = useState(false);
@@ -256,38 +256,49 @@ export default function TripSummary({ trip, onCreateTrip, onNavigate }) {
     }
   }
 
+  const SummaryTitle = exportPage ? "h2" : "h1";
+  const exportControls = trip && (
+    <div className="trip-summary-export" data-pdf-exclude>
+      <button type="button" className="btn primary" onClick={exportPdf} disabled={exportingPdf}>{exportingPdf ? "正在生成 PDF…" : "导出 PDF"}</button>
+      {pdfStatus && <p className={`trip-summary-export-status is-${pdfStatus.type}`} role={pdfStatus.type === "error" ? "alert" : "status"}>{pdfStatus.message}</p>}
+    </div>
+  );
+
   return (
-    <div className="trip-summary-page" ref={summaryRef}>
-      <div className="page-intro">
-        <div><div className="eyebrow">YOUR COMPLETE TRIP</div><h1>完整旅行计划</h1><p>只读汇总当前旅行资料；修改档案后，这里会显示最新内容。</p></div>
-        {trip && <div className="trip-summary-export" data-pdf-exclude>
-          <button type="button" className="btn primary" onClick={exportPdf} disabled={exportingPdf}>{exportingPdf ? "正在生成 PDF…" : "导出 PDF"}</button>
-          {pdfStatus && <p className={`trip-summary-export-status is-${pdfStatus.type}`} role={pdfStatus.type === "error" ? "alert" : "status"}>{pdfStatus.message}</p>}
-        </div>}
+    <div className="trip-summary-page">
+      {exportPage && <div className="page-intro">
+        <div><div className="eyebrow">TAKE YOUR PLAN WITH YOU</div><h1>计划导出</h1><p>预览当前旅行，将行程、费用与出行准备导出为 A4 PDF；电话号码会自动遮盖。</p></div>
+        {exportControls}
+      </div>}
+      <div className="trip-summary-page" ref={summaryRef}>
+        <div className="page-intro">
+          <div><div className="eyebrow">YOUR COMPLETE TRIP</div><SummaryTitle className={exportPage ? "trip-summary-preview-title" : undefined}>完整旅行计划</SummaryTitle><p>只读汇总当前旅行资料；修改档案后，这里会显示最新内容。</p></div>
+          {!exportPage && exportControls}
+        </div>
+        {!trip ? (
+          <div className="empty trip-empty-state"><strong>还没有旅行档案</strong><span>创建旅行后，这里会汇总行程、费用和出行准备。</span><button type="button" className="btn primary" onClick={onCreateTrip}>创建旅行档案</button></div>
+        ) : (
+          <>
+            <section className="card trip-summary-hero" aria-labelledby="trip-summary-title">
+              <div className="trip-summary-hero-top"><span className="eyebrow">旅行概览</span><span className="sample-label">当前旅行数据汇总</span></div>
+              <h2 id="trip-summary-title">{displayValue(trip.name)}</h2>
+              <ol className="trip-summary-destinations" aria-label="目的地顺序">
+                {trip.destinations?.length ? trip.destinations.map((city, index) => <li key={`${index}-${city}`}><span>{index + 1}</span>{displayValue(city)}</li>) : <li>未填写</li>}
+              </ol>
+              <dl className="trip-summary-trip-fields">
+                <SummaryField label="出发日期">{formatDate(trip.startDate)}</SummaryField>
+                <SummaryField label="返程日期">{formatDate(trip.endDate)}</SummaryField>
+                <SummaryField label="同行人数">{trip.people === null || trip.people === undefined || trip.people === "" ? "未填写" : `${trip.people} 人`}</SummaryField>
+                <SummaryField label="偏好与硬性条件">{displayValue(trip.preferences)}</SummaryField>
+              </dl>
+            </section>
+            <ItinerarySection trip={trip} onNavigate={onNavigate} />
+            <ExpenseSection trip={trip} onNavigate={onNavigate} />
+            <PreparationSection trip={trip} onNavigate={onNavigate} />
+            <p className="trip-summary-readonly-note">本页只读。预约和住宿信息由你记录，未与外部供应方核实；动态路线、店铺与地图查询不会在此页缓存或补造。</p>
+          </>
+        )}
       </div>
-      {!trip ? (
-        <div className="empty trip-empty-state"><strong>还没有旅行档案</strong><span>创建旅行后，这里会汇总行程、费用和出行准备。</span><button type="button" className="btn primary" onClick={onCreateTrip}>创建旅行档案</button></div>
-      ) : (
-        <>
-          <section className="card trip-summary-hero" aria-labelledby="trip-summary-title">
-            <div className="trip-summary-hero-top"><span className="eyebrow">旅行概览</span><span className="sample-label">当前旅行数据汇总</span></div>
-            <h2 id="trip-summary-title">{displayValue(trip.name)}</h2>
-            <ol className="trip-summary-destinations" aria-label="目的地顺序">
-              {trip.destinations?.length ? trip.destinations.map((city, index) => <li key={`${index}-${city}`}><span>{index + 1}</span>{displayValue(city)}</li>) : <li>未填写</li>}
-            </ol>
-            <dl className="trip-summary-trip-fields">
-              <SummaryField label="出发日期">{formatDate(trip.startDate)}</SummaryField>
-              <SummaryField label="返程日期">{formatDate(trip.endDate)}</SummaryField>
-              <SummaryField label="同行人数">{trip.people === null || trip.people === undefined || trip.people === "" ? "未填写" : `${trip.people} 人`}</SummaryField>
-              <SummaryField label="偏好与硬性条件">{displayValue(trip.preferences)}</SummaryField>
-            </dl>
-          </section>
-          <ItinerarySection trip={trip} onNavigate={onNavigate} />
-          <ExpenseSection trip={trip} onNavigate={onNavigate} />
-          <PreparationSection trip={trip} onNavigate={onNavigate} />
-          <p className="trip-summary-readonly-note">本页只读。预约和住宿信息由你记录，未与外部供应方核实；动态路线、店铺与地图查询不会在此页缓存或补造。</p>
-        </>
-      )}
     </div>
   );
 }

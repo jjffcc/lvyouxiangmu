@@ -26,8 +26,7 @@ function matchesAmapFields(poi, filter) {
     .some((value) => value.includes(filter));
 }
 
-export default function FoodDiscovery({ tripDestinations, trip, canFavorite = true, onToggleFavorite }) {
-  const initialCity = trip?.destinations?.[0] || "杭州";
+export default function FoodDiscovery({ tripDestinations, trip, initialCity = trip?.destinations?.[0] || "杭州", canFavorite = true, onToggleFavorite }) {
   const [city, setCity] = useState(initialCity);
   const [cityInput, setCityInput] = useState(initialCity);
   const [keywordInput, setKeywordInput] = useState("餐饮");

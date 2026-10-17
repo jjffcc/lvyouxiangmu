@@ -1,6 +1,6 @@
 # 国内旅游规划产品
 
-当前阶段：纯静态双击版继续作为视觉与通用交互参考；真实产品代码从 `frontend/`（React + Vite）和 `backend/`（Next.js API）启动。高德开放平台尚未接入。此目录是独立的旅游产品上下文，保留上层原有电商文档。
+当前阶段：纯静态双击版继续作为视觉与通用交互参考；真实产品代码从 `frontend/`（React + Vite）和 `backend/`（Next.js API）启动。高德开放平台地图 API 已接入；配置前端 Web JS Key 与后端安全密钥后可调用地图功能。此目录是独立的旅游产品上下文，保留上层原有电商文档。
 
 ## 阅读入口
 
@@ -24,3 +24,13 @@
 在此目录运行 `npm install` 安装前端与 API 依赖。先将 `backend/.env.example` 复制为 `backend/.env`，填写 PostgreSQL 连接地址，然后按文件名顺序将 `backend/db/migrations/` 中的 SQL 文件应用到该数据库。
 
 分别启动 `npm run dev:api` 和 `npm run dev:frontend`；前端开发服务器会把 `/api` 请求转发到本地 Next.js API。纯静态原型仍通过 `prototype/v1/index.html` 单独打开。
+
+### 本机 Windows / WSL 启动
+
+本机开发环境使用 Ubuntu WSL 中的 PostgreSQL，账户和会话持久保存在该数据库中。完成数据库配置及迁移后，在项目目录运行：
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\start-local.ps1
+```
+
+脚本会启动 PostgreSQL、后端与前端，并保持 Ubuntu 子系统运行，防止空闲退出导致认证不可用；已监听的服务端口会复用。启动后访问 `http://127.0.0.1:5173/`。服务日志位于当前用户临时目录的 `tujian-*.log`。数据库连接信息保存在忽略提交的 `backend/.env` 中。

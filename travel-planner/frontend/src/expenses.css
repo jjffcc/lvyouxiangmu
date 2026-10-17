@@ -1,5 +1,14 @@
 .expense-trip-context{display:flex;gap:6px;align-items:center;margin:0 0 16px;flex-wrap:wrap}
 .expense-trip-context span{margin-left:auto;color:#66758c}
+.expense-category-summary{padding:16px 18px;margin-bottom:16px}
+.expense-category-summary h2{margin:0;color:#2a3d58;font-size:14px}
+.expense-category-summary table{width:100%;border-collapse:collapse;font-size:11px}
+.expense-category-summary th,.expense-category-summary td{text-align:left;padding:10px 6px;border-bottom:1px solid #edf0f5;overflow-wrap:anywhere}
+.expense-category-summary th{color:#53647b}
+.expense-category-summary td{color:#40536d}
+.expense-category-filter{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 16px}
+.expense-category-filter label{color:#53647b;font-size:11px}
+.expense-category-filter .select{width:auto;min-width:110px}
 .expense-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0 0 12px}
 .expense-summary>div{display:grid;gap:6px;min-width:0;padding:14px 16px;border:1px solid #e8edf5;border-radius:12px;background:#fff}
 .expense-summary span{color:#7b899d;font-size:10px}
